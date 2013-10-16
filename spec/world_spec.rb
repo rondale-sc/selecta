@@ -24,6 +24,25 @@ describe Search do
     end
 
     it "moves down the filtered search results"
+
+  end
+
+  describe "paging through the list" do
+    let(:config) do
+      Configuration.from_inputs(%w[
+        one two three four five six seven eight nine
+        ten eleven twelve thirteen fourteen fifteen
+        sixteen seventeen eighteen nineteen twenty
+      ])
+    end
+
+    it "pages down the list" do
+      world.page_down.selected_choice.should == "twenty"
+    end
+
+    it "pages up the list" do
+      world.page_down.page_up.selected_choice.should == "one"
+    end
   end
 
   it "move up the list" do

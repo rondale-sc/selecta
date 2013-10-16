@@ -23,6 +23,9 @@ KEY_CTRL_C = ?\C-c
 KEY_CTRL_N = ?\C-n
 KEY_CTRL_P = ?\C-p
 KEY_CTRL_W = ?\C-w
+KEY_CTRL_D = ?\C-d
+KEY_CTRL_U = ?\C-u
+
 # I don't know how to get this key code other than by hard-coding the ordinal
 KEY_DELETE = 127.chr
 
@@ -70,6 +73,9 @@ class Selecta
     when KEY_CTRL_W then search.delete_word
     when KEY_DELETE then search.backspace
 
+    when KEY_CTRL_D then search.page_down
+    when KEY_CTRL_U then search.page_up
+
     when ?\r then search.done
     when KEY_CTRL_C then raise SystemExit
 
@@ -112,6 +118,8 @@ end
 class Search
   attr_reader :choices, :index, :query, :config
 
+  PAGE_LENGTH = 20
+
   def initialize(vars)
     @vars = vars
     @config = vars.fetch(:config)
@@ -141,13 +149,20 @@ class Search
     matches.fetch(@index)
   end
 
+  def page_down
+    merge(:index => index_down_by(PAGE_LENGTH))
+  end
+
   def down
-    index = [@index + 1, matches.count - 1, config.visible_choices - 1].min
-    merge(:index => index)
+    merge(:index => index_down_by(1))
+  end
+
+  def page_up
+    merge(:index => index_up_by(PAGE_LENGTH))
   end
 
   def up
-    merge(:index => [@index - 1, 0].max)
+    merge(:index => index_up_by(1))
   end
 
   def append_search_string(string)
@@ -172,6 +187,16 @@ class Search
 
   def done
     merge(:done => true)
+  end
+
+  private
+
+  def index_down_by(count)
+    [@index + count, matches.count - 1, config.visible_choices - 1].min
+  end
+
+  def index_up_by(count)
+    [@index - count, 0].max
   end
 end
 
